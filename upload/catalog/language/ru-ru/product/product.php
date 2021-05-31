@@ -37,6 +37,7 @@ $_['text_u_cant_load_more']    = 'Вы не можете загружать бо
 $_['text_images']              = 'изображений';
 $_['text_was_selected_one_file'] = 'Был выбран 1 файл';
 $_['text_was_selected_files']  = 'файлов были выбраны';
+$_['text_anonymous']           = 'Аноним';
 
 // Entry
 $_['entry_qty']                = 'Количество';

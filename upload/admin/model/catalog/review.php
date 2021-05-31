@@ -138,4 +138,52 @@ class ModelCatalogReview extends Model {
 
 		return $query->row['total'];
 	}
+
+    public function getReviewAddictionInfo($review_id) {
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "review_addiction_info WHERE review_id = '" . (int)$review_id . "'");
+
+        return $query->row;
+    }
+
+    public function addReviewAddictionInfo($review_id, $hidden_customer_info) {
+        $this->db->query("INSERT INTO " . DB_PREFIX . "review_addiction_info SET review_id = '" . (int)$review_id . "', `hidden_customer_info` = '" . (int)$hidden_customer_info . "'");
+    }
+
+    public function editReviewAddictionInfo($review_id, $hidden_customer_info) {
+        $this->db->query("UPDATE " . DB_PREFIX . "review_addiction_info SET `hidden_customer_info` = '" . (int)$hidden_customer_info . "' WHERE review_id = '" . (int)$review_id . "'");
+    }
+
+    public function deleteReviewAddictionInfo($review_id) {
+        $this->db->query("DELETE FROM " . DB_PREFIX . "review_addiction_info WHERE review_id = '" . (int)$review_id . "'");
+    }
+
+    public function getReviewImages($review_id) {
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "review_image WHERE review_id = '" . (int)$review_id . "'");
+
+        return $query->rows;
+    }
+
+    public function getReviewImage($image_id) {
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "review_image WHERE id = '" . (int)$image_id . "'");
+
+        return $query->rows;
+    }
+
+    public function deleteReviewImages($review_id) {
+        $images = $this->getReviewImages($review_id);
+
+        foreach ($images as $image) {
+            unlink( DIR_IMAGE . '\\' . $image['catalog'] . $image['filename']);
+        }
+
+        $this->db->query("DELETE FROM " . DB_PREFIX . "review_image WHERE review_id = '" . (int)$review_id . "'");
+    }
+
+    public function deleteReviewImage($image_id) {
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "review_image WHERE id = '" . (int)$image_id . "'");
+
+        unlink( DIR_IMAGE . '\\' . $query->row['catalog'] . $query->row['filename']);
+
+        $this->db->query("DELETE FROM " . DB_PREFIX . "review_image WHERE id = '" . (int)$image_id . "'");
+    }
 }

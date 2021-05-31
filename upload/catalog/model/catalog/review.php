@@ -69,8 +69,20 @@ class ModelCatalogReview extends Model {
 		return $query->row['total'];
 	}
 
+    public function getReviewImages($review_id) {
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "review_image WHERE review_id = '" . (int)$review_id . "'");
+
+        return $query->rows;
+    }
+
 	public function addReviewImage($review_id, $catalog, $filename) {
         $this->db->query("INSERT INTO " . DB_PREFIX . "review_image SET review_id = '" . (int)$review_id . "', `catalog` = '" . $this->db->escape($catalog) . "', filename = '" . $this->db->escape($filename) . "'");
+    }
+
+    public function getReviewAddictionInfo($review_id) {
+        $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "review_addiction_info WHERE review_id = '" . (int)$review_id . "'");
+
+        return $query->row;
     }
 
     public function addReviewAddictionInfo($review_id, $hidden_customer_info) {

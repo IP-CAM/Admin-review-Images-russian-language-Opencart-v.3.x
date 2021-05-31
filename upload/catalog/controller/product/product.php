@@ -538,10 +538,22 @@ class ControllerProductProduct extends Controller {
 		$results = $this->model_catalog_review->getReviewsByProductId($this->request->get['product_id'], ($page - 1) * 5, 5);
 
 		foreach ($results as $result) {
+            $review_addiction_info = $this->model_catalog_review->getReviewAddictionInfo($result['review_id']);
+            $review_images = $this->model_catalog_review->getReviewImages($result['review_id']);
+
+            if (!empty($review_images)) {
+                $this->load->model('tool/image');
+
+                foreach ($review_images as $review_image) {
+                    $images[] = $this->model_tool_image->resize($review_image['catalog'] . $review_image['filename'], 150, 150);
+                }
+            }
+
 			$data['reviews'][] = array(
-				'author'     => $result['author'],
+				'author'     => $review_addiction_info['hidden_customer_info'] == "0" ? $result['author'] : $this->language->get('text_anonymous'),
 				'text'       => nl2br($result['text']),
 				'rating'     => (int)$result['rating'],
+				'images'     => !empty($images) ? $images : array(),
 				'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added']))
 			);
 		}
@@ -613,9 +625,10 @@ class ControllerProductProduct extends Controller {
 
         if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->request->post['review_file_upload'] == 1) {
 
-            $upload_dir = 'uploads';
+            $upload_dir_path = 'image/uploads';
+            $upload_dir = 'uploads/';
 
-            if( ! is_dir( $upload_dir ) ) mkdir( $upload_dir, 0777 );
+            if( ! is_dir( $upload_dir_path ) ) mkdir( $upload_dir_path, 0777 );
 
             $files      = $this->request->files; // полученные файлы
             $done_files = array();
@@ -631,10 +644,10 @@ class ControllerProductProduct extends Controller {
 
                     $randomName = substr_replace(sha1(microtime(true)), '', 12).'.'.$mime;
 
-                    if( move_uploaded_file( $file['tmp_name'][$key], "$upload_dir/$randomName" ) ) {
+                    if( move_uploaded_file( $file['tmp_name'][$key], "$upload_dir_path/$randomName" ) ) {
                         $this->model_catalog_review->addReviewImage($this->request->post['review_id'], $upload_dir, $randomName);
 
-                        $done_files[] = realpath( "$upload_dir/$randomName" );
+                        $done_files[] = realpath( "$upload_dir_path/$randomName" );
                     }
                 }
 
