@@ -76,13 +76,16 @@ class ControllerCatalogReview extends Controller {
 		$this->load->model('catalog/review');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			$this->model_catalog_review->editReview($this->request->get['review_id'], $this->request->post);
-
-            if (isset($this->request->post['hidden_customer_info'])) {
-                $this->model_catalog_review->editReviewAddictionInfo($this->request->get['review_id'], 1);
-            } else {
-                $this->model_catalog_review->editReviewAddictionInfo($this->request->get['review_id'], 0);
-            }
+		    echo "<pre>";
+		    print_r($this->request->files);
+		    echo "</pre>";
+//			$this->model_catalog_review->editReview($this->request->get['review_id'], $this->request->post);
+//
+//            if (isset($this->request->post['hidden_customer_info'])) {
+//                $this->model_catalog_review->editReviewAddictionInfo($this->request->get['review_id'], 1);
+//            } else {
+//                $this->model_catalog_review->editReviewAddictionInfo($this->request->get['review_id'], 0);
+//            }
 
 			$this->session->data['success'] = $this->language->get('text_success');
 

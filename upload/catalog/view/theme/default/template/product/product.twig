@@ -48,7 +48,7 @@
     color: #FFF;
   }
 
-  #dropped-files .image {
+  #dropped-files .review-image-preview {
     position: relative;
     height: 200px;
     width: 300px;
@@ -101,48 +101,6 @@
 
   #dropped-files #upload-button .delete:hover {
     background: rgba(0,0,0,0.8);
-  }
-
-  #loading {
-    display: none;
-    width: 100%;
-    position: relative;
-    margin: 20px;
-  }
-
-  #loading-bar {
-    width: 404px;
-    height: 40px;
-    background: #fff;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    border-radius: 5px;
-    padding: 2px;
-  }
-
-  .loading-color {
-    width: 0%;
-    height: 100%;
-    -webkit-transition: all 0.1s ease-in;
-    -moz-transition: all 0.1s ease-in;
-    -ms-transition: all 0.1s ease-in;
-    -o-transition: all 0.1s ease-in;
-    transition: all 0.1s ease-in;
-    border-radius: inherit;
-    background-color: #4edbf1;
-  }
-
-  #loading-content {
-    position: relative;
-    top: 15px;
-    font-size: 1.2em;
-    font-weight: bold;
-    text-align: center;
-    width: 405px;
-  }
-
-  #file-name-holder {
-    width: 100%;
-    float: left;
   }
 
   #file-name-holder h1 {
@@ -269,12 +227,6 @@
                           <div id="upload-button">
                             <span>0 {{ text_files }}</span>
                             <a href="#" class="delete">{{ button_delete_all }}</a>
-                            <div id="loading">
-                              <div id="loading-bar">
-                                <div class="loading-color"></div>
-                              </div>
-                              <div id="loading-content"></div>
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -559,12 +511,23 @@
 <script>
     var $ = jQuery.noConflict();
 
-    var mainImagesFiles; // переменная. будет содержать данные файлов
+    var mainImagesFiles = []; // переменная. будет содержать данные файлов
 
-    // заполняем переменную данными, при изменении значения поля file
-    $('input[type=file]').on('change', function(){
-        mainImagesFiles = this.files;
-    });
+    // // заполняем переменную данными, при изменении значения поля file
+    // $('input[type=file]').on('change', function(){
+    //     var fileIdCounter = 0;
+    //
+    //     for (var i = 0; i < this.files.length; i++) {
+    //         fileIdCounter++;
+    //         var file = this.files[i];
+    //         var fileId = fileIdCounter;
+    //
+    //         mainImagesFiles.push({
+    //             id: fileId,
+    //             file: file
+    //         });
+    //     }
+    // });
 
     $(document).ready(function() {
         // В dataTransfer помещаются изображения которые перетащили в область div
@@ -591,7 +554,17 @@
         $('#drop-files').on('drop', function(e) {
             // Передаем в files все полученные изображения
             var files = e.dataTransfer.files;
-            mainImagesFiles = e.dataTransfer.files;
+            var fileIdCounter = 0;
+            for (var i = 0; i < e.dataTransfer.files.length; i++) {
+                fileIdCounter++;
+                var file = e.dataTransfer.files[i];
+                var fileId = fileIdCounter;
+
+                mainImagesFiles.push({
+                    id: fileId,
+                    file: file
+                });
+            }
             // Проверяем на максимальное количество файлов
             if (files.length <= maxFiles) {
                 // Передаем массив с файлами в функцию загрузки на предпросмотр
@@ -606,7 +579,18 @@
         defaultUploadBtn.on('change', function() {
             // Заполняем массив выбранными изображениями
             var files = $(this)[0].files;
-            mainImagesFiles = $(this)[0].files;
+            var fileIdCounter = 0;
+
+            for (var i = 0; i < $(this)[0].files.length; i++) {
+                fileIdCounter++;
+                var file = $(this)[0].files[i];
+                var fileId = fileIdCounter;
+
+                mainImagesFiles.push({
+                    id: fileId,
+                    file: file
+                });
+            }
             // Проверяем на максимальное количество файлов
             if (files.length <= maxFiles) {
                 // Передаем массив с файлами в функцию загрузки на предпросмотр
@@ -686,8 +670,8 @@
             // Цикл для каждого элемента массива
             for (i = start; i < end; i++) {
                 // размещаем загруженные изображения
-                if($('#dropped-files > .image').length <= maxFiles) {
-                    $('#dropped-files').append('<div id="img-'+i+'" class="image" style="background: url('+dataArray[i].value+'); background-size: cover;"> <a href="#" id="drop-'+i+'" class="drop-button">{{ button_delete_image }}</a></div>');
+                if($('#dropped-files > .review-image-preview').length <= maxFiles) {
+                    $('#dropped-files').append('<div id="img-'+i+'" class="review-image-preview" style="background: url('+dataArray[i].value+'); background-size: cover;"> <a href="#" id="drop-'+i+'" class="drop-button">{{ button_delete_image }}</a></div>');
                 }
             }
             return false;
@@ -703,14 +687,13 @@
 
             // Удаляем все изображения на странице и скрываем кнопки
             $('#upload-button').hide();
-            $('#dropped-files > .image').remove();
+            $('#dropped-files > .review-image-preview').remove();
             $('#uploaded-holder').hide();
 
             // Очищаем массив
             dataArray.length = 0;
             $('#uploadbtn').val('')
-            mainImagesFiles = undefined;
-            console.log(mainImagesFiles)
+            mainImagesFiles = [];
 
             return false;
         }
@@ -726,11 +709,22 @@
             temp = elid.split('-');
             // получаем значение после тире тоесть индекс изображения в массиве
             dataArray.splice(temp[1],1);
+            mainImagesFiles.splice(temp[1],1);
             // Удаляем старые эскизы
-            $('#dropped-files > .image').remove();
+            $('#dropped-files > .review-image-preview').remove();
             // Обновляем эскизи в соответсвии с обновленным массивом
             addImage(-1);
         });
+
+        $('#dropped-files').delegate('.review-image-preview', 'click', function () {
+            if($(this).outerWidth() === 300) {
+                $(this).css('width', 600)
+                $(this).css('height', 400)
+            } else {
+                $(this).css('width', 300)
+                $(this).css('height', 200)
+            }
+        })
 
         // Удалить все изображения кнопка
         $('#dropped-files #upload-button .delete').click(restartFiles);
@@ -929,8 +923,10 @@ $('#button-review').on('click', function() {
 
             // заполняем объект данных файлами в подходящем для отправки формате
             $.each( mainImagesFiles, function( i, file ){
-                dataImages.append( "file[" + i + "]", file );
+                dataImages.append( "file[" + i + "]", file.file );
             });
+
+            console.log(dataImages.values())
 
             // добавим переменную для идентификации запроса
             dataImages.append( 'review_file_upload', 1 );

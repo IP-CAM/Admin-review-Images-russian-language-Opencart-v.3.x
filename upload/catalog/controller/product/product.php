@@ -623,6 +623,8 @@ class ControllerProductProduct extends Controller {
 
         $json = array();
 
+        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+
         if ($this->request->server['REQUEST_METHOD'] == 'POST' && $this->request->post['review_file_upload'] == 1) {
 
             $upload_dir_path = 'image/uploads';
@@ -631,6 +633,7 @@ class ControllerProductProduct extends Controller {
             if( ! is_dir( $upload_dir_path ) ) mkdir( $upload_dir_path, 0777 );
 
             $files      = $this->request->files; // полученные файлы
+
             $done_files = array();
 
             // переместим файлы из временной директории в указанную
@@ -642,7 +645,7 @@ class ControllerProductProduct extends Controller {
                     $getMime = explode('.', $file_name);
                     $mime = end($getMime);
 
-                    $randomName = substr_replace(sha1(microtime(true)), '', 12).'.'.$mime;
+                    $randomName = substr(str_shuffle($permitted_chars), 0, 10) . '.' . $mime;
 
                     if( move_uploaded_file( $file['tmp_name'][$key], "$upload_dir_path/$randomName" ) ) {
                         $this->model_catalog_review->addReviewImage($this->request->post['review_id'], $upload_dir, $randomName);
