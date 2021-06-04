@@ -30,6 +30,38 @@ class ControllerCatalogReview extends Controller {
                 $this->model_catalog_review->addReviewAddictionInfo($review_id, 0);
             }
 
+            if (isset($this->request->files['review-image']['name'][0]) && !empty($this->request->files['review-image']['name'][0])) {
+                $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+                $upload_dir_path = DIR_IMAGE . "uploads";
+                $upload_dir = "uploads/";
+
+                if( ! is_dir( $upload_dir_path ) ) mkdir( $upload_dir_path, 0777 );
+
+                $files      = $this->request->files; // полученные файлы
+
+                $done_files = array();
+
+                // переместим файлы из временной директории в указанную
+                foreach( $files as $file ) {
+                    $files_name = $file['name'];
+
+                    foreach ($files_name as $key => $file_name) {
+                        // Получаем расширение файла
+                        $getMime = explode('.', $file_name);
+                        $mime = end($getMime);
+
+                        $randomName = substr(str_shuffle($permitted_chars), 0, 10) . '.' . $mime;
+
+                        if( move_uploaded_file( $file['tmp_name'][$key], "$upload_dir_path/$randomName" ) ) {
+                            $this->model_catalog_review->addReviewImage($review_id, $upload_dir, $randomName);
+
+                            $done_files[] = realpath( "$upload_dir_path/$randomName" );
+                        }
+                    }
+
+                }
+            }
+
 			$this->session->data['success'] = $this->language->get('text_success');
 
 			$url = '';
@@ -76,16 +108,45 @@ class ControllerCatalogReview extends Controller {
 		$this->load->model('catalog/review');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-		    echo "<pre>";
-		    print_r($this->request->files);
-		    echo "</pre>";
-//			$this->model_catalog_review->editReview($this->request->get['review_id'], $this->request->post);
-//
-//            if (isset($this->request->post['hidden_customer_info'])) {
-//                $this->model_catalog_review->editReviewAddictionInfo($this->request->get['review_id'], 1);
-//            } else {
-//                $this->model_catalog_review->editReviewAddictionInfo($this->request->get['review_id'], 0);
-//            }
+			$this->model_catalog_review->editReview($this->request->get['review_id'], $this->request->post);
+
+            if (isset($this->request->post['hidden_customer_info'])) {
+                $this->model_catalog_review->editReviewAddictionInfo($this->request->get['review_id'], 1);
+            } else {
+                $this->model_catalog_review->editReviewAddictionInfo($this->request->get['review_id'], 0);
+            }
+
+            if (isset($this->request->files['review-image']['name'][0]) && !empty($this->request->files['review-image']['name'][0])) {
+                $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+                $upload_dir_path = DIR_IMAGE . "uploads";
+                $upload_dir = "uploads/";
+
+                if( ! is_dir( $upload_dir_path ) ) mkdir( $upload_dir_path, 0777 );
+
+                $files      = $this->request->files; // полученные файлы
+
+                $done_files = array();
+
+                // переместим файлы из временной директории в указанную
+                foreach( $files as $file ) {
+                    $files_name = $file['name'];
+
+                    foreach ($files_name as $key => $file_name) {
+                        // Получаем расширение файла
+                        $getMime = explode('.', $file_name);
+                        $mime = end($getMime);
+
+                        $randomName = substr(str_shuffle($permitted_chars), 0, 10) . '.' . $mime;
+
+                        if( move_uploaded_file( $file['tmp_name'][$key], "$upload_dir_path/$randomName" ) ) {
+                            $this->model_catalog_review->addReviewImage($this->request->get['review_id'], $upload_dir, $randomName);
+
+                            $done_files[] = realpath( "$upload_dir_path/$randomName" );
+                        }
+                    }
+
+                }
+            }
 
 			$this->session->data['success'] = $this->language->get('text_success');
 
@@ -434,6 +495,12 @@ class ControllerCatalogReview extends Controller {
 			$data['error_rating'] = '';
 		}
 
+		if (isset($this->error['image'])) {
+			$data['error_image'] = $this->error['image'];
+		} else {
+			$data['error_image'] = '';
+		}
+
 		$url = '';
 
 		if (isset($this->request->get['filter_product'])) {
@@ -488,10 +555,13 @@ class ControllerCatalogReview extends Controller {
 
 		if (isset($this->request->get['review_id']) && ($this->request->server['REQUEST_METHOD'] != 'POST')) {
 			$review_info = $this->model_catalog_review->getReview($this->request->get['review_id']);
-			$review_addiction_info = $this->model_catalog_review->getReviewAddictionInfo($this->request->get['review_id']);
-			$review_images = $this->model_catalog_review->getReviewImages($this->request->get['review_id']);
+		}
 
-			if (!empty($review_images)) {
+		if (isset($this->request->get['review_id'])) {
+            $review_addiction_info = $this->model_catalog_review->getReviewAddictionInfo($this->request->get['review_id']);
+            $review_images = $this->model_catalog_review->getReviewImages($this->request->get['review_id']);
+
+            if (!empty($review_images)) {
                 $this->load->model('tool/image');
 
                 foreach ($review_images as $review_image) {
@@ -499,10 +569,9 @@ class ControllerCatalogReview extends Controller {
                         'image_id' => $review_image['id'],
                         'image' => $this->model_tool_image->resize($review_image['catalog'] . $review_image['filename'], 250, 250),
                     );
-			    }
+                }
             }
-
-		}
+        }
 
 		$data['user_token'] = $this->session->data['user_token'];
 		
@@ -613,6 +682,30 @@ class ControllerCatalogReview extends Controller {
 		if (!isset($this->request->post['rating']) || $this->request->post['rating'] < 0 || $this->request->post['rating'] > 5) {
 			$this->error['rating'] = $this->language->get('error_rating');
 		}
+
+		if (isset($this->request->files)) {
+
+		    if (isset($this->request->get['review_id'])) {
+                $this->load->model('catalog/review');
+                $total_added_images = $this->model_catalog_review->getTotalReviewImages($this->request->get['review_id']);
+                $count_can_download = 10 - (int)$total_added_images;
+                foreach ($this->request->files as $file) {
+                    $files_name = $file['name'];
+
+                    if (count($files_name) > $count_can_download) {
+                        $this->error['image'] = $this->language->get('error_more_image');
+                    }
+                }
+            } else {
+                foreach ($this->request->files as $file) {
+                    $files_name = $file['name'];
+
+                    if (count($files_name) > 10) {
+                        $this->error['image'] = $this->language->get('error_more_image');
+                    }
+                }
+            }
+        }
 
 		return !$this->error;
 	}

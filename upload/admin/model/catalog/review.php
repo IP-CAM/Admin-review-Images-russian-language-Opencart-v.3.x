@@ -163,10 +163,20 @@ class ModelCatalogReview extends Model {
         return $query->rows;
     }
 
+    public function getTotalReviewImages($review_id) {
+        $query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "review_image WHERE review_id = '" . (int)$review_id . "'");
+
+        return $query->row['total'];;
+    }
+
     public function getReviewImage($image_id) {
         $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "review_image WHERE id = '" . (int)$image_id . "'");
 
         return $query->rows;
+    }
+
+    public function addReviewImage($review_id, $catalog, $filename) {
+        $this->db->query("INSERT INTO " . DB_PREFIX . "review_image SET review_id = '" . (int)$review_id . "', `catalog` = '" . $this->db->escape($catalog) . "', filename = '" . $this->db->escape($filename) . "'");
     }
 
     public function deleteReviewImages($review_id) {
