@@ -38,6 +38,15 @@ $_['text_images']              = 'изображений';
 $_['text_was_selected_one_file'] = 'Был выбран 1 файл';
 $_['text_was_selected_files']  = 'файлов были выбраны';
 $_['text_anonymous']           = 'Аноним';
+$_['text_reviews_word']        = 'Отзывы';
+$_['text_popular']             = 'Популярные';
+$_['text_new']                 = 'Новые';
+$_['text_only_with_photo']     = 'Только с фото';
+$_['text_star_5']              = '5 звезд';
+$_['text_star_4']              = '4 звезды';
+$_['text_star_3']              = '3 звезды';
+$_['text_star_2']              = '2 звезды';
+$_['text_star_1']              = '1 звезда';
 
 // Entry
 $_['entry_qty']                = 'Количество';

@@ -49,22 +49,67 @@ class ModelCatalogReview extends Model {
 		return $review_id;
 	}
 
-	public function getReviewsByProductId($product_id, $start = 0, $limit = 20) {
-		if ($start < 0) {
-			$start = 0;
-		}
+	public function getReviewsByProductId($data = array()) {
+	    $sql = "SELECT r.review_id, r.author, r.rating, r.text, p.product_id, pd.name, p.price, p.image, r.date_added FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product p ON (r.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id)";
 
-		if ($limit < 1) {
-			$limit = 20;
-		}
+	    if (isset($data['filter_photo']) && !empty($data['filter_photo'])) {
+	        $sql .= " LEFT JOIN " . DB_PREFIX . "review_image ri ON (r.review_id = ri.review_id)";
+        }
 
-		$query = $this->db->query("SELECT r.review_id, r.author, r.rating, r.text, p.product_id, pd.name, p.price, p.image, r.date_added FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product p ON (r.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) WHERE p.product_id = '" . (int)$product_id . "' AND p.date_available <= NOW() AND p.status = '1' AND r.status = '1' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY r.date_added DESC LIMIT " . (int)$start . "," . (int)$limit);
+	    $sql .= " WHERE p.product_id = '" . (int)$data['product_id'] . "' AND p.date_available <= NOW() AND p.status = '1' AND r.status = '1' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+
+        if (isset($data['filter_photo']) && !empty($data['filter_photo'])) {
+            $sql .= " AND ri.review_id > 0 GROUP BY ri.review_id";
+        }
+
+        $sort_data = array(
+            'r.rating',
+            'r.date_added'
+        );
+
+        if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+            $sql .= " ORDER BY " . $data['sort'];
+        } else {
+            $sql .= " ORDER BY r.rating";
+        }
+
+        if (isset($data['order']) && ($data['order'] == 'DESC')) {
+            $sql .= " DESC";
+        } else {
+            $sql .= " ASC";
+        }
+
+        if (isset($data['start']) || isset($data['limit'])) {
+            if ($data['start'] < 0) {
+                $data['start'] = 0;
+            }
+
+            if ($data['limit'] < 1) {
+                $data['limit'] = 20;
+            }
+
+            $sql .= " LIMIT " . (int)$data['start'] . "," . (int)$data['limit'];
+        }
+
+		$query = $this->db->query($sql);
 
 		return $query->rows;
 	}
 
-	public function getTotalReviewsByProductId($product_id) {
-		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product p ON (r.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) WHERE p.product_id = '" . (int)$product_id . "' AND p.date_available <= NOW() AND p.status = '1' AND r.status = '1' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "'");
+	public function getTotalReviewsByProductId($data = array()) {
+	    $sql = "SELECT COUNT(*) AS total FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product p ON (r.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id)";
+
+        if (isset($data['filter_photo']) && !empty($data['filter_photo'])) {
+            $sql .= " LEFT JOIN " . DB_PREFIX . "review_image ri ON (r.review_id = ri.review_id)";
+        }
+
+	    $sql .= " WHERE p.product_id = '" . (int)$data['product_id'] . "' AND p.date_available <= NOW() AND p.status = '1' AND r.status = '1' AND pd.language_id = '" . (int)$this->config->get('config_language_id') . "'";
+
+        if (isset($data['filter_photo']) && !empty($data['filter_photo'])) {
+            $sql .= " AND ri.review_id > 0 GROUP BY ri.review_id";
+        }
+
+		$query = $this->db->query($sql);
 
 		return $query->row['total'];
 	}

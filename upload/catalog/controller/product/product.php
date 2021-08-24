@@ -362,6 +362,45 @@ class ControllerProductProduct extends Controller {
 			$data['reviews'] = sprintf($this->language->get('text_reviews'), (int)$product_info['reviews']);
 			$data['rating'] = (int)$product_info['rating'];
 
+            $filter_data = array(
+                'product_id' => $product_info['product_id'],
+            );
+
+            $reviews = $this->model_catalog_review->getReviewsByProductId($filter_data);
+
+            $reviews_count = 0;
+            $reviews_total_rating = 0;
+
+            $data['rating_info'] = array(
+                '5' => 0,
+                '4' => 0,
+                '3' => 0,
+                '2' => 0,
+                '1' => 0,
+            );
+
+            foreach ($reviews as $review) {
+                $data['rating_info'][$review['rating']]++;
+
+                $reviews_total_rating += $review['rating'];
+                $reviews_count++;
+            }
+
+            if ($reviews_count > 0) {
+                $data['reviews_total_rating'] = number_format((float)$reviews_total_rating / $reviews_count, 1, '.', '');
+            } else {
+                $data['reviews_total_rating'] = 0;
+            }
+
+            foreach ($data['rating_info'] as $key => $rating_count) {
+                $rating_info = array(
+                    'rating_number' => $this->language->get('text_star_' . $key) ,
+                    'rating_count'  => $rating_count,
+                    'rating_percent'=> ($reviews_count > 0) ? round((($rating_count / $reviews_count) * 100)) : 0
+                );
+                $data['rating_info'][$key] = $rating_info;
+            }
+
 			// Captcha
 			if ($this->config->get('captcha_' . $this->config->get('config_captcha') . '_status') && in_array('review', (array)$this->config->get('config_captcha_page'))) {
 				$data['captcha'] = $this->load->controller('extension/captcha/' . $this->config->get('config_captcha'));
@@ -525,21 +564,68 @@ class ControllerProductProduct extends Controller {
 
 		$this->load->model('catalog/review');
 
+        if (isset($this->request->get['sort'])) {
+            $sort = $this->request->get['sort'];
+        } else {
+            $sort = 'r.rating';
+        }
+
+        if (isset($this->request->get['order'])) {
+            $order = $this->request->get['order'];
+        } else {
+            $order = 'DESC';
+        }
+
+        if (isset($this->request->get['withPhoto'])) {
+            $withPhoto = $this->request->get['withPhoto'];
+        } else {
+            $withPhoto = '';
+        }
+
 		if (isset($this->request->get['page'])) {
 			$page = $this->request->get['page'];
 		} else {
 			$page = 1;
 		}
 
+        $url = '';
+
+        $data['sorts'] = array();
+
+        $data['sorts'][] = array(
+            'text'  => $this->language->get('text_popular'),
+            'value' => 'r.rating-DESC',
+            'href'  => $this->url->link('product/product/review', 'product_id=' . $this->request->get['product_id'] . '&sort=r.rating&order=DESC' . $url)
+        );
+
+        $data['sorts'][] = array(
+            'text'  => $this->language->get('text_new'),
+            'value' => 'r.date_added-DESC',
+            'href'  => $this->url->link('product/product/review', 'product_id=' . $this->request->get['product_id'] . '&sort=r.date_added&order=DESC' . $url)
+        );
+
+        $data['only_with_photo'] = $this->url->link('product/product/review', 'product_id=' . $this->request->get['product_id'] . $url);
+
 		$data['reviews'] = array();
 
-		$review_total = $this->model_catalog_review->getTotalReviewsByProductId($this->request->get['product_id']);
+		$filter_data = array(
+		    'product_id'   => $this->request->get['product_id'],
+            'filter_photo' => $withPhoto,
+            'sort'         => $sort,
+            'order'        => $order,
+            'start'        => ($page - 1) * 5,
+            'limit'        => 5
+        );
 
-		$results = $this->model_catalog_review->getReviewsByProductId($this->request->get['product_id'], ($page - 1) * 5, 5);
+		$review_total = $this->model_catalog_review->getTotalReviewsByProductId($filter_data);
+
+		$results = $this->model_catalog_review->getReviewsByProductId($filter_data);
 
 		foreach ($results as $result) {
             $review_addiction_info = $this->model_catalog_review->getReviewAddictionInfo($result['review_id']);
             $review_images = $this->model_catalog_review->getReviewImages($result['review_id']);
+
+            $images = array();
 
             if (!empty($review_images)) {
                 $this->load->model('tool/image');
@@ -558,11 +644,25 @@ class ControllerProductProduct extends Controller {
 			);
 		}
 
+        $data['sort'] = $sort;
+        $data['order'] = $order;
+        $data['withPhoto'] = $withPhoto;
+
+        $url = '';
+
+        if (isset($this->request->get['sort'])) {
+            $url .= '&sort=' . $this->request->get['sort'];
+        }
+
+        if (isset($this->request->get['order'])) {
+            $url .= '&order=' . $this->request->get['order'];
+        }
+
 		$pagination = new Pagination();
 		$pagination->total = $review_total;
 		$pagination->page = $page;
 		$pagination->limit = 5;
-		$pagination->url = $this->url->link('product/product/review', 'product_id=' . $this->request->get['product_id'] . '&page={page}');
+		$pagination->url = $this->url->link('product/product/review', 'product_id=' . $this->request->get['product_id'] . $url . '&page={page}');
 
 		$data['pagination'] = $pagination->render();
 
