@@ -2,21 +2,23 @@
 class ModelCatalogReview extends Model {
     public function install() {
         $this->db->query("
-		CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "review_addiction_info` (
-		  `id` INT(11) NOT NULL AUTO_INCREMENT,
-		  `review_id` INT(11) NOT NULL,
-		  `hidden_customer_info` INT(5) NOT NULL,
-		  PRIMARY KEY (`id`)
-		) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+            CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "review_addiction_info` (
+              `id` INT(11) NOT NULL AUTO_INCREMENT,
+              `review_id` INT(11) NOT NULL,
+              `hidden_customer_info` INT(5) NOT NULL,
+              `help_count` INT(11) NOT NULL DEFAULT 0,
+              `not_help_count` INT(11) NOT NULL DEFAULT 0,
+              PRIMARY KEY (`id`)
+            ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 		");
         $this->db->query("
-		CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "review_image` (
-		  `id` INT(11) NOT NULL AUTO_INCREMENT,
-		  `review_id` INT(11) NOT NULL,
-		  `catalog` varchar(255) NOT NULL,
-		  `filename` varchar(255) NOT NULL,
-		  PRIMARY KEY (`id`)
-		) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+            CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "review_image` (
+              `id` INT(11) NOT NULL AUTO_INCREMENT,
+              `review_id` INT(11) NOT NULL,
+              `catalog` varchar(255) NOT NULL,
+              `filename` varchar(255) NOT NULL,
+              PRIMARY KEY (`id`)
+            ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 		");
     }
 

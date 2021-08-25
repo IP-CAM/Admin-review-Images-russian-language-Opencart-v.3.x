@@ -47,6 +47,8 @@ $_['text_star_4']              = '4 звезды';
 $_['text_star_3']              = '3 звезды';
 $_['text_star_2']              = '2 звезды';
 $_['text_star_1']              = '1 звезда';
+$_['text_your_review']         = 'Ваш отзыв о товаре';
+$_['text_delivery_review']         = 'Отзыв о доставке вы можете оставить отдельно.';
 
 // Entry
 $_['entry_qty']                = 'Количество';
@@ -65,6 +67,8 @@ $_['tab_review']               = 'Отзывов (%s)';
 // Buttons
 $_['button_delete_all']        = 'Удалить все';
 $_['button_delete_image']      = 'Удалить изображение';
+$_['button_write_review']      = 'Написать отзыв';
+$_['button_leave_review_delivery'] = 'Оставьте отзыв о доставке';
 
 // Error
 $_['error_name']               = 'Имя должно быть от 3 до 25 символов!';

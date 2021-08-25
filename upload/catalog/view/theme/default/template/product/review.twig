@@ -1,3 +1,39 @@
+<style>
+  .review-block {
+    background: #FFFFFF;
+    border: 1px solid #C7DDE6;
+    box-sizing: border-box;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 10px;
+  }
+  .review-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .author-avatar {
+    display: flex;
+  }
+  .author-avatar .author-avatar-text {
+    display: inline-block;
+    width: 66px;
+    height: 66px;
+    line-height: 66px;
+    border-radius: 50%;
+    text-align: center;
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    background-color: #D6E5EB;
+  }
+  .reviews-blocks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+</style>
+
 {% if reviews %}
     <h3>{{ text_reviews_word }}</h3>
 
@@ -26,29 +62,34 @@
     </div>
 
     {% for review in reviews %}
-    <table class="table table-striped table-bordered">
-      <tr>
-        <td style="width: 50%;"><strong>{{ review.author }}</strong></td>
-        <td class="text-right">{{ review.date_added }}</td>
-      </tr>
-      <tr>
-        <td colspan="2">
-          <p>{{ review.text }}</p>
-          {% for i in 1..5 %}
-            {% if review.rating < i %}
-              <span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
-            {% else %}
-              <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
-            {% endif %}
-          {% endfor %}
-          <p>
-            {% for image in review.images %}
-              <img src="{{ image }}" alt="">
+      <div class="review-block">
+        <div class="review-block-header">
+
+          <div class="author-avatar">
+            <div class="author-avatar-text">{{ review.first_letter_author }}</div>
+          </div>
+          <span>{{ review.author }}</span>
+          <span>
+            {{ review.rating }}
+
+            {% for i in 1..5 %}
+              {% if review.rating < i %}
+                <span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
+                  {% else %}
+                <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+              {% endif %}
             {% endfor %}
-          </p>
-        </td>
-      </tr>
-    </table>
+            </span>
+          <span>{{ review.status }}</span>
+          <span>{{ review.date_added }}</span>
+        </div>
+        <p>{{ review.text }}</p>
+        <p>
+          {% for image in review.images %}
+            <img src="{{ image }}" alt="">
+          {% endfor %}
+        </p>
+      </div>
     {% endfor %}
 
     <div class="text-right">{{ pagination }}</div>
