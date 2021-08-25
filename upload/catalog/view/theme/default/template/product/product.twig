@@ -612,6 +612,7 @@ $('button[id^=\'button-upload\']').on('click', function() {
 <script>
     $('#review').delegate('.help-review-btn', 'click', function (e) {
         let review_id = $(this).attr('data-review-id')
+        let that = $(this)
 
         $.ajax({
             url: 'index.php?route=product/product/updateReviewHelpCount&review_id=' + review_id,
