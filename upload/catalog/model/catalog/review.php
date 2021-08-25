@@ -130,6 +130,14 @@ class ModelCatalogReview extends Model {
         return $query->row;
     }
 
+    public function updateReviewHelpCount($review_id) {
+        $this->db->query("UPDATE " . DB_PREFIX . "review_addiction_info SET help_count = (help_count + 1) WHERE review_id = '" . (int)$review_id . "'");
+    }
+
+    public function updateReviewNotHelpCount($review_id) {
+        $this->db->query("UPDATE " . DB_PREFIX . "review_addiction_info SET not_help_count = (not_help_count + 1) WHERE review_id = '" . (int)$review_id . "'");
+    }
+
     public function addReviewAddictionInfo($review_id, $hidden_customer_info) {
         $this->db->query("INSERT INTO " . DB_PREFIX . "review_addiction_info SET review_id = '" . (int)$review_id . "', `hidden_customer_info` = '" . (int)$hidden_customer_info . "'");
     }

@@ -646,11 +646,25 @@ class ControllerProductProduct extends Controller {
                 $first_letter_author = utf8_strtoupper(utf8_substr($this->language->get('text_anonymous'),0,1));
             }
 
+            $display_help_question = true;
+
+            if (isset($_COOKIE['rated_reviews'])) {
+                $rated_review = explode(',', $_COOKIE['rated_reviews']);
+
+                if (in_array($result['review_id'], $rated_review)) {
+                    $display_help_question = false;
+                }
+            }
+
 			$data['reviews'][] = array(
+				'review_id'  => $result['review_id'],
 				'author'     => $author_name,
                 'first_letter_author' => $first_letter_author,
 				'text'       => nl2br($result['text']),
 				'rating'     => (int)$result['rating'],
+				'display_help_question' => $display_help_question,
+				'help_count' => (int)$review_addiction_info['help_count'],
+				'not_help_count' => (int)$review_addiction_info['not_help_count'],
 				'images'     => !empty($images) ? $images : array(),
 				'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added']))
 			);
@@ -1164,6 +1178,60 @@ class ControllerProductProduct extends Controller {
             }
 
             $json = $done_files ? array('files' => $done_files ) : array('error' => 'Ошибка загрузки файлов.');
+        }
+
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($json));
+    }
+
+    public function updateReviewHelpCount() {
+	    $json = array();
+
+        if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+            $this->load->model('catalog/review');
+
+            $this->model_catalog_review->updateReviewHelpCount($this->request->get['review_id']);
+
+            $rated_reviews = array();
+
+            if (isset($_COOKIE['rated_reviews'])) {
+                $rated_reviews = explode(',', $_COOKIE['rated_reviews']);
+            }
+
+            if (!in_array($this->request->get['review_id'], $rated_reviews)) {
+                $rated_reviews[] = $this->request->get['review_id'];
+
+                setcookie("rated_reviews", implode(',', $rated_reviews), time() + 60 * 60 * 24 * 365 * 10);
+            }
+
+            $json['success'] = $this->language->get('text_success');
+        }
+
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($json));
+    }
+
+    public function updateReviewNotHelpCount() {
+        $json = array();
+
+        if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+            $this->load->model('catalog/review');
+
+            $this->model_catalog_review->updateReviewNotHelpCount($this->request->get['review_id']);
+
+            $rated_reviews = array();
+
+            if (isset($_COOKIE['rated_reviews'])) {
+                $rated_reviews = explode(',', $_COOKIE['rated_reviews']);
+            }
+
+            if (!in_array($this->request->get['review_id'], $rated_reviews)) {
+                $rated_reviews[] = $this->request->get['review_id'];
+
+                setcookie("rated_reviews", implode(',', $rated_reviews), time() + 60 * 60 * 24 * 365 * 10);
+            }
+
+            $json['success'] = $this->language->get('text_success');
         }
 
         $this->response->addHeader('Content-Type: application/json');
