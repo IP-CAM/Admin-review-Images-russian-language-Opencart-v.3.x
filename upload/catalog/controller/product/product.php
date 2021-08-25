@@ -570,7 +570,7 @@ class ControllerProductProduct extends Controller {
         if (isset($this->request->get['sort'])) {
             $sort = $this->request->get['sort'];
         } else {
-            $sort = 'r.rating';
+            $sort = 'rai.help_count';
         }
 
         if (isset($this->request->get['order'])) {
@@ -597,8 +597,8 @@ class ControllerProductProduct extends Controller {
 
         $data['sorts'][] = array(
             'text'  => $this->language->get('text_popular'),
-            'value' => 'r.rating-DESC',
-            'href'  => $this->url->link('product/product/review', 'product_id=' . $this->request->get['product_id'] . '&sort=r.rating&order=DESC' . $url)
+            'value' => 'rai.help_count-DESC',
+            'href'  => $this->url->link('product/product/review', 'product_id=' . $this->request->get['product_id'] . '&sort=rai.help_count&order=DESC' . $url)
         );
 
         $data['sorts'][] = array(

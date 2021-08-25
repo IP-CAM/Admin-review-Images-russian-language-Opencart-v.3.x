@@ -50,7 +50,7 @@ class ModelCatalogReview extends Model {
 	}
 
 	public function getReviewsByProductId($data = array()) {
-	    $sql = "SELECT r.review_id, r.author, r.rating, r.text, p.product_id, pd.name, p.price, p.image, r.date_added FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product p ON (r.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id)";
+	    $sql = "SELECT r.review_id, r.author, r.rating, r.text, p.product_id, pd.name, p.price, p.image, r.date_added FROM " . DB_PREFIX . "review r LEFT JOIN " . DB_PREFIX . "product p ON (r.product_id = p.product_id) LEFT JOIN " . DB_PREFIX . "product_description pd ON (p.product_id = pd.product_id) LEFT JOIN " . DB_PREFIX . "review_addiction_info rai ON (r.review_id = rai.review_id)";
 
 	    if (isset($data['filter_photo']) && !empty($data['filter_photo'])) {
 	        $sql .= " LEFT JOIN " . DB_PREFIX . "review_image ri ON (r.review_id = ri.review_id)";
@@ -64,6 +64,7 @@ class ModelCatalogReview extends Model {
 
         $sort_data = array(
             'r.rating',
+            'rai.help_count',
             'r.date_added'
         );
 
