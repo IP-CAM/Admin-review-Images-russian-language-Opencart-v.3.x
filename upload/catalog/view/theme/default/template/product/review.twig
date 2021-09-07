@@ -91,13 +91,13 @@
             <img src="{{ image }}" alt="">
           {% endfor %}
         </p>
-        {% if review.display_help_question %}
+
           <p>
             <span>{{ text_do_you_help_review }}</span>
-            <button class="btn btn-default help-review-btn" data-review-id="{{ review.review_id }}">{{ text_yes }} {% if review.help_count %}{{ review.help_count }}{% endif %}</button>
-            <button class="btn btn-default not-help-review-btn" data-review-id="{{ review.review_id }}">{{ text_no }} {% if review.not_help_count %}{{ review.not_help_count }}{% endif %}</button>
+            <button class="btn btn-default help-review-btn" data-review-id="{{ review.review_id }}" {% if not review.display_help_question %}disabled="disabled"{% endif %}>{{ text_yes }} <span class="review-help-count">{% if review.help_count %}{{ review.help_count }}{% endif %}</span></button>
+            <button class="btn btn-default not-help-review-btn" data-review-id="{{ review.review_id }}" {% if not review.display_help_question %}disabled="disabled"{% endif %}>{{ text_no }} <span class="review-not-help-count">{% if review.not_help_count %}{{ review.not_help_count }}{% endif %}</span></button>
           </p>
-        {% endif %}
+
       </div>
     {% endfor %}
 

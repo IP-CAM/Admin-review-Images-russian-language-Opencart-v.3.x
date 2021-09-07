@@ -619,7 +619,10 @@ $('button[id^=\'button-upload\']').on('click', function() {
             type: 'post',
             dataType: 'json',
             success: function(json) {
-                $(that).parent().remove()
+                let helpCount = parseInt($(that).find('.review-help-count').text())
+                helpCount = helpCount ? helpCount + 1 : 1;
+                $(that).find('.review-help-count').text(helpCount)
+                $(that).parent().find('button').attr('disabled', 'disabled')
             }
         });
     })
@@ -634,7 +637,10 @@ $('button[id^=\'button-upload\']').on('click', function() {
             type: 'post',
             dataType: 'json',
             success: function(json) {
-                $(that).parent().remove()
+                let notHelpCount = parseInt($(that).find('.review-not-help-count').text())
+                notHelpCount = notHelpCount ? notHelpCount + 1 : 1;
+                $(that).find('.review-not-help-count').text(notHelpCount)
+                $(that).parent().find('button').attr('disabled', 'disabled')
             }
         });
     })
